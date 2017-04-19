@@ -19,5 +19,6 @@
 <dependency><groupId>owl-deps</groupId><artifactId>owlapi-src</artifactId><version>1.0</version></dependency>
 <dependency><groupId>hermit</groupId><artifactId>HermiT</artifactId><version>1.0</version></dependency>
 <dependency><groupId>hermit</groupId><artifactId>org</artifactId><version>1.0</version></dependency>
+
   </dependencies>
 </project>

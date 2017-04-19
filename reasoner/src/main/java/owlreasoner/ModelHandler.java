@@ -1,5 +1,6 @@
 package owlreasoner;
 
+import com.clarkparsia.owlapi.explanation.*;
 import org.semanticweb.owlapi.apibinding.*;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
@@ -8,35 +9,43 @@ import java.io.*;
 import java.util.*;
 
 public class ModelHandler {
-    public OWLOntology getOntology(){
-        OWLOntologyManager manager=OWLManager.createOWLOntologyManager();
-        File file=new File("/home/adityas/Projects/Test_Reasoner/Reasoner/data/test.n3");
-        System.out.println(manager);
-        OWLOntology ontology=null;
+
+    private OWLOntology ontology;
+    private OWLOntologyManager ontologyManager;
+    private OWLDataFactory dataFactory;
+
+    public ModelHandler(String filename){
+        File file=new File(filename);
+        this.ontologyManager=OWLManager.createOWLOntologyManager();
+        this.dataFactory=OWLManager.getOWLDataFactory();
         try {
-                ontology=manager.loadOntologyFromOntologyDocument(file);
-                System.out.println(ontology);
-                //assertNotNull(ontology);
+                this.ontology=ontologyManager.loadOntologyFromOntologyDocument(file);
+                System.out.println("Ontology loaded.");
         }
         catch (Exception e){
             e.printStackTrace();
+            System.out.println("Failed to load ontology.");
             System.exit(1);
         }
-        return ontology;
     }
 
-    public void printAxioms(OWLOntology ontology){
-        OWLDataFactory data_factory=OWLManager.getOWLDataFactory();
-        OWLClass owl_class=data_factory.getOWLThing();
-        for (OWLEntity _class : ontology.getSignature()){
+    public void printClasses(){
+        for (OWLEntity _class : this.ontology.getSignature()){
             System.out.println(_class.toStringID());
         }
-        System.out.println(owl_class);
     }
 
-    public void getInference(OWLOntology ontology){
-        OWLReasoner reasoner=new Reasoner(ontology);
-        System.out.println(reasoner.isConsistent());
+    public OWLOntology getOntology(){
+        return this.ontology;
+    }
+
+    public void printOntology(){
+        try {
+                this.ontologyManager.saveOntology(this.ontology,System.out);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }
 

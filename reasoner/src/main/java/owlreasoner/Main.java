@@ -7,10 +7,12 @@ import org.semanticweb.owlapi.reasoner.*;
 public class Main {
 
     public static void main(String args[]) {
-        System.out.println("Reasoner started!");
-        ModelHandler handler=new ModelHandler();
+        ModelHandler handler=new ModelHandler("/home/adityas/Projects/Test_Reasoner/Reasoner/data/test.n3");
+        handler.printClasses();
+        handler.printOntology();
         OWLOntology onto=handler.getOntology();
-        handler.printAxioms(onto);
-        handler.getInference(onto);
+        ReasoningModule rm=new ReasoningModule(onto);
+        System.out.println(rm.getModelConsistency());
+        //rm.printClassHeirarchy();
     }
 }
