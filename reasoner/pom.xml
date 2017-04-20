@@ -14,11 +14,29 @@
       <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
+<dependency><groupId>hermit</groupId><artifactId>HermiT</artifactId><version>1.0</version></dependency>
+<dependency><groupId>hermit</groupId><artifactId>org</artifactId><version>1.0</version></dependency>
+<!-- https://mvnrepository.com/artifact/net.sourceforge.owlapi/owlexplanation -->
+<dependency>
+    <groupId>net.sourceforge.owlapi</groupId>
+    <artifactId>owlexplanation</artifactId>
+    <version>2.0.0</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/net.sourceforge.owlapi/owlapi-distribution -->
+<dependency>
+    <groupId>net.sourceforge.owlapi</groupId>
+    <artifactId>owlapi-distribution</artifactId>
+    <version>5.1.0</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/net.sourceforge.owlapi/owlapi-api -->
+<dependency>
+    <groupId>net.sourceforge.owlapi</groupId>
+    <artifactId>owlapi-api</artifactId>
+    <version>5.1.0</version>
+</dependency>
     <dependency><groupId>owl-deps</groupId><artifactId>pellet</artifactId><version>1.0</version></dependency>
 <dependency><groupId>owl-deps</groupId><artifactId>owlapi-bin</artifactId><version>1.0</version></dependency>
 <dependency><groupId>owl-deps</groupId><artifactId>owlapi-src</artifactId><version>1.0</version></dependency>
-<dependency><groupId>hermit</groupId><artifactId>HermiT</artifactId><version>1.0</version></dependency>
-<dependency><groupId>hermit</groupId><artifactId>org</artifactId><version>1.0</version></dependency>
 
   </dependencies>
 </project>

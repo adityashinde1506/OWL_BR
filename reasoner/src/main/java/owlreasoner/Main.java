@@ -8,11 +8,9 @@ public class Main {
 
     public static void main(String args[]) {
         ModelHandler handler=new ModelHandler("/home/adityas/Projects/Test_Reasoner/Reasoner/data/test.n3");
-        handler.printClasses();
-        handler.printOntology();
-        OWLOntology onto=handler.getOntology();
-        ReasoningModule rm=new ReasoningModule(onto);
-        System.out.println(rm.getModelConsistency());
-        //rm.printClassHeirarchy();
+        handler.createKB();
+        //ReasoningModule rm=new ReasoningModule(onto);
+        //System.out.println(rm.getModelConsistency());
+        //rm.explain(handler.getThing());
     }
 }

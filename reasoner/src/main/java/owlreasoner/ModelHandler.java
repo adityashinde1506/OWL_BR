@@ -13,6 +13,18 @@ public class ModelHandler {
     private OWLOntology ontology;
     private OWLOntologyManager ontologyManager;
     private OWLDataFactory dataFactory;
+    private OWLOntology KB;
+    private ReasoningModule reasoningModule;
+
+    private void addAxiomToKB(OWLAxiom axiom){
+        System.out.println("Adding "+axiom.toString()+" to KB.");
+        AddAxiom addAxiom=new AddAxiom(this.KB,axiom);
+        this.ontologyManager.applyChange(addAxiom);
+        if(!this.reasoningModule.getModelConsistency()){
+            this.reasoningModule.printUnsatisfiableClasses();
+            //this.reasoningModule.explain(axiom);
+        }
+    }
 
     public ModelHandler(String filename){
         File file=new File(filename);
@@ -20,6 +32,8 @@ public class ModelHandler {
         this.dataFactory=OWLManager.getOWLDataFactory();
         try {
                 this.ontology=ontologyManager.loadOntologyFromOntologyDocument(file);
+                this.KB=ontologyManager.createOntology();
+                this.reasoningModule=new ReasoningModule(this.KB);
                 System.out.println("Ontology loaded.");
         }
         catch (Exception e){
@@ -27,6 +41,12 @@ public class ModelHandler {
             System.out.println("Failed to load ontology.");
             System.exit(1);
         }
+    }
+
+    public void createKB(){
+       for (OWLAxiom axiom : this.ontology.getAxioms()){
+           this.addAxiomToKB(axiom);
+       }
     }
 
     public void printClasses(){
@@ -40,12 +60,13 @@ public class ModelHandler {
     }
 
     public void printOntology(){
-        try {
-                this.ontologyManager.saveOntology(this.ontology,System.out);
+        for(OWLAxiom axiom: this.ontology.getAxioms()){
+            System.out.println(axiom.toString());
         }
-        catch (Exception e){
-            e.printStackTrace();
-        }
+    }
+
+    public OWLClass getThing(){
+        return this.dataFactory.getOWLThing();
     }
 }
 
