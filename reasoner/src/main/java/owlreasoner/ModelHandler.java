@@ -17,11 +17,13 @@ public class ModelHandler {
     private ReasoningModule reasoningModule;
 
     private void addAxiomToKB(OWLAxiom axiom){
-        System.out.println("Adding "+axiom.toString()+" to KB.");
+        // Adds axiom to the knowledge base. Then checks for inconsistencies and calls the resolve methods if inconsistency is found. Very slow. :( :(
+
         AddAxiom addAxiom=new AddAxiom(this.KB,axiom);
         this.ontologyManager.applyChange(addAxiom);
         if(!this.reasoningModule.getModelConsistency()){
-            this.reasoningModule.printUnsatisfiableClasses();
+            //System.out.println("---------------Inconsistency on last addition to KB resolving ----------------");
+            this.reasoningModule.resolveInconsistency();
             //this.reasoningModule.explain(axiom);
         }
     }
@@ -33,8 +35,9 @@ public class ModelHandler {
         try {
                 this.ontology=ontologyManager.loadOntologyFromOntologyDocument(file);
                 this.KB=ontologyManager.createOntology();
-                this.reasoningModule=new ReasoningModule(this.KB);
+                this.reasoningModule=new ReasoningModule(this.ontology,this.ontologyManager);
                 System.out.println("Ontology loaded.");
+                System.out.println("------------------");
         }
         catch (Exception e){
             e.printStackTrace();
@@ -44,22 +47,26 @@ public class ModelHandler {
     }
 
     public void createKB(){
+        /* Adds axioms to the knowledge base one at a time. Better to merge two ontologies using OWLMerger instead of iterating like this. Use only for testing. */
        for (OWLAxiom axiom : this.ontology.getAxioms()){
            this.addAxiomToKB(axiom);
        }
     }
 
     public void printClasses(){
+        /*Just for debugging*/
         for (OWLEntity _class : this.ontology.getSignature()){
             System.out.println(_class.toStringID());
         }
     }
 
     public OWLOntology getOntology(){
+        /* In case some other class wants to directly mess with the knowledge base. # Need to flush the reasoner buffer for changes to reflect in the reasoner.*/
         return this.ontology;
     }
 
     public void printOntology(){
+        /* Just for debugging */
         for(OWLAxiom axiom: this.ontology.getAxioms()){
             System.out.println(axiom.toString());
         }
@@ -67,6 +74,11 @@ public class ModelHandler {
 
     public OWLClass getThing(){
         return this.dataFactory.getOWLThing();
+    }
+
+    public ReasoningModule getReasoningModule(){
+        /* To provide direct access to the reasoning module.*/
+        return this.reasoningModule;
     }
 }
 

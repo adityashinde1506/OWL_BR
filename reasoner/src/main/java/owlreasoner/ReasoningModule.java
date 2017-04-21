@@ -13,63 +13,83 @@ public class ReasoningModule {
     private OWLReasoner reasoner;
     private Reasoner.ReasonerFactory factory=new Reasoner.ReasonerFactory();
     public OWLOntology ontology;
+    private OWLOntologyManager manager;
     private Configuration configuration;
     private SatisfiabilityConverter satConverter=new SatisfiabilityConverter(OWLManager.getOWLDataFactory());
-
-    public ReasoningModule(OWLOntology o){
+    private RevisionModule revisionModule;
+        
+    public ReasoningModule(OWLOntology o,OWLOntologyManager m){
+        /* Constructor*/
         this.ontology=o;
+        this.manager=m;
         this.configuration=new Configuration();
         this.configuration.throwInconsistentOntologyException=false;
         this.reasoner=this.factory.createReasoner(this.ontology,this.configuration);
         //this.reasoner=new Reasoner(o);
         //System.out.println(this.reasoner.isPrecomputed());
+        this.revisionModule=new RevisionModule(this.reasoner,this.ontology);
         System.out.println("Reasoning Module Initialised.");
     }
 
     public boolean getModelConsistency(){
+        /* Tell if the KB is consistent*/
         this.reasoner.flush();
         return this.reasoner.isConsistent();
     }
 
     public void printModel(){
+        /* Just for debugging*/
         for (OWLAxiom axiom:this.ontology.getAxioms()){
             System.out.println(axiom.toString());
         }
     }
 
     public boolean checkSatisfiability(OWLAxiom axiom){
+        /* Check if KB satisfies a particular axiom. Throws an exception sometimes. Not yet able to figure out why.*/
         this.reasoner.flush();
         return this.reasoner.isSatisfiable(this.satConverter.convert(axiom));
     }
 
-    public void printUnsatisfiableClasses(){
+    public void resolveInconsistency(){
+        /* Get a list of unsatisfiable classes. Then provide explanations for each one.*/
         Node<OWLClass> unSatNode=this.reasoner.getUnsatisfiableClasses();
         for(OWLClass _class:unSatNode.getEntities()){
-            /*if(_class.isOWLThing() || _class.isOWLNothing()){
-                continue;
-            }*/
-            System.out.println(_class.toString());
-            this.explain(_class);
+            //System.out.println(_class.toString());
+            this.getExplanation(_class);
+        }
+        if(this.revisionModule.discardInconsistentAxioms(this.manager)){
+            this.printModel();
+            System.out.println(this.getModelConsistency());
+        }
+        else{
+            System.out.println("Could not remove inconsistencies.");
         }
     }
 
-    public void explain(OWLClass _axiom){
+    public void computeInferences(){
+        /* Supposed to do initial reasoning over the KB. Does not work. No idea why.*/
+        Reasoner reasoner=new Reasoner(this.ontology);
+        reasoner.precomputeInferences(InferenceType.CLASS_ASSERTIONS);
+        reasoner.flush();
+    }
+
+    public void getExplanation(OWLClass _axiom){
+        /* Get axioms which explain why the class is unsatisfiable. Then add each axiom to the Revision module to revise the KB.*/
         factory=new Reasoner.ReasonerFactory() {
             protected OWLReasoner createHermiTOWLReasoner(Configuration configuration,OWLOntology ontology){
                 configuration.throwInconsistentOntologyException=false;
                 return new Reasoner(configuration,ontology);
             }
         };
+
         BlackBoxExplanation bbExp=new BlackBoxExplanation(this.ontology,factory,this.reasoner);
         HSTExplanationGenerator expGenerator= new HSTExplanationGenerator(bbExp);
         Set<Set<OWLAxiom>> explanations=expGenerator.getExplanations(_axiom);
-        System.out.println("Explanations fetched");
         for (Set<OWLAxiom> axiomSet : explanations){
-            System.out.println("Getting Axioms.");
             for (OWLAxiom axiom: axiomSet){
-                System.out.println(axiom.toString());
+                this.revisionModule.addUnSatAxiom(axiom);
+               // System.out.println(axiom.getAxiomType().toString());
             }
-            System.out.println("--------------------------");
         }
     }
 }
