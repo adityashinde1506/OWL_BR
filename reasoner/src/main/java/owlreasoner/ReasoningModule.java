@@ -27,8 +27,20 @@ public class ReasoningModule {
         this.reasoner=this.factory.createReasoner(this.ontology,this.configuration);
         //this.reasoner=new Reasoner(o);
         //System.out.println(this.reasoner.isPrecomputed());
-        this.revisionModule=new RevisionModule(this.reasoner,this.ontology);
+        //this.revisionModule=new RevisionModule(this.reasoner,this.ontology);
         System.out.println("Reasoning Module Initialised.");
+    }
+
+    public RevisionModule getRevisionModule(){
+        return this.revisionModule;
+    }
+
+    public void getClasses(OWLAxiom axiom){
+        System.out.println("Getting classes in axiom.");
+        for (OWLClass _class: axiom.getClassesInSignature()){
+            System.out.println(_class.toString());
+            //this.revisionModule.getUnsatAxiom(_class);
+        }
     }
 
     public boolean getModelConsistency(){
@@ -50,13 +62,27 @@ public class ReasoningModule {
         return this.reasoner.isSatisfiable(this.satConverter.convert(axiom));
     }
 
-    public void resolveInconsistency(){
-        /* Get a list of unsatisfiable classes. Then provide explanations for each one.*/
+    public void populateRevisionModule(){
+        this.revisionModule=new RevisionModule(this.reasoner);
         Node<OWLClass> unSatNode=this.reasoner.getUnsatisfiableClasses();
         for(OWLClass _class:unSatNode.getEntities()){
             //System.out.println(_class.toString());
             this.getExplanation(_class);
         }
+    }
+
+    public void reviseOntology(){
+        for(OWLAxiom axiom: this.revisionModule.getInconsistencyCreators()){
+            RemoveAxiom raxiom=new RemoveAxiom(this.ontology,axiom);
+            System.out.println("Removing axiom "+axiom.toString());
+            this.manager.applyChange(raxiom);
+        }
+    }
+
+/*
+    public void resolveInconsistency(){
+        // Get a list of unsatisfiable classes. Then provide explanations for each one.
+        this.populateRevisionModule();
         if(this.revisionModule.discardInconsistentAxioms(this.manager)){
             this.printModel();
             System.out.println(this.getModelConsistency());
@@ -65,7 +91,7 @@ public class ReasoningModule {
             System.out.println("Could not remove inconsistencies.");
         }
     }
-
+*/
     public void computeInferences(){
         /* Supposed to do initial reasoning over the KB. Does not work. No idea why.*/
         Reasoner reasoner=new Reasoner(this.ontology);

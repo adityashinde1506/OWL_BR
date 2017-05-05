@@ -14,17 +14,20 @@ public class ModelHandler {
     private OWLOntologyManager ontologyManager;
     private OWLDataFactory dataFactory;
     private OWLOntology KB;
+    private OWLOntology updateOntology;
     private ReasoningModule reasoningModule;
 
     private void addAxiomToKB(OWLAxiom axiom){
         // Adds axiom to the knowledge base. Then checks for inconsistencies and calls the resolve methods if inconsistency is found. Very slow. :( :(
 
-        AddAxiom addAxiom=new AddAxiom(this.KB,axiom);
+        AddAxiom addAxiom=new AddAxiom(this.ontology,axiom);
         this.ontologyManager.applyChange(addAxiom);
         if(!this.reasoningModule.getModelConsistency()){
-            //System.out.println("---------------Inconsistency on last addition to KB resolving ----------------");
-            this.reasoningModule.resolveInconsistency();
-            //this.reasoningModule.explain(axiom);
+            System.out.println("---------------Inconsistency on last addition to KB ----------------");
+            System.out.println("Resolving...");
+            this.reasoningModule.populateRevisionModule();
+            this.reasoningModule.reviseOntology();
+            System.out.println("---------------Inconsistency Resolved ----------------\r\n");
         }
     }
 
@@ -43,6 +46,22 @@ public class ModelHandler {
             e.printStackTrace();
             System.out.println("Failed to load ontology.");
             System.exit(1);
+        }
+    }
+
+    public void updateOntology(String filename){
+        System.out.println("Updating Ontology...");
+        File file=new File(filename);
+        try{
+                this.updateOntology=this.ontologyManager.loadOntologyFromOntologyDocument(file);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            System.exit(1);
+        }
+        for(OWLAxiom axiom:this.updateOntology.getAxioms()){
+            System.out.println("Adding axiom "+axiom.toString());
+            this.addAxiomToKB(axiom);
         }
     }
 
@@ -74,6 +93,16 @@ public class ModelHandler {
 
     public OWLClass getThing(){
         return this.dataFactory.getOWLThing();
+    }
+
+    public void writeRevisedOntology(){
+        try{
+                this.ontologyManager.saveOntology(this.ontology,new FileOutputStream("revised.n3"));
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 
     public ReasoningModule getReasoningModule(){
