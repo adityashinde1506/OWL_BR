@@ -39,6 +39,7 @@ public class RevisionModule {
     }
 
     public Set<OWLNamedIndividual> getIndividuals(){
+       //Gets a list of Individuals from unsatisfiable Class Assertion axioms.
        return this.unSatOntology.getIndividualsInSignature();
     }
 /*
@@ -56,17 +57,20 @@ public class RevisionModule {
     }
 
     private void addException(OWLSubClassOfAxiom axiom,OWLNamedIndividual individual){
+        //Supposed to add exception ofr individual to GCI. But could not do it. so simply remove the subclassof assertion.
         System.out.println("Inconsistency causing axiom is "+axiom.toString());
         this.toRemove.add(axiom);
     }
 
     private void weakenAxiom(Set<OWLSubClassOfAxiom> axioms,OWLNamedIndividual individual){
+        //Supposed to implement weakening algorithm. But could not do it.
         for(OWLSubClassOfAxiom axiom:axioms){
             this.addException(axiom,individual);
         }
     }
 
     private void weakenRelatedSubClassAxiom(OWLClassAssertionAxiom caAxiom,OWLNamedIndividual individual){
+        //Weakens the subclassof axiom related to the class expression asserted in the unsatisfiable class assertion.
         OWLClassExpression cExp=caAxiom.getClassExpression();
         Set<OWLSubClassOfAxiom> axioms=this.getSubClassAssertion(cExp);
         if(!axioms.isEmpty()){
@@ -84,11 +88,13 @@ public class RevisionModule {
     }
 
     public void reviseKB(){
+        //Searches the KB of all unsatisfiable classes and adds the one causing inconsistency.
         this.printAxioms();
         this.locateInconsistency();
     }
 
     public HashSet<OWLAxiom> getInconsistencyCreators(){
+        //Returns the set of subclass axioms to remove.
         this.reviseKB();
         return this.toRemove;
     }

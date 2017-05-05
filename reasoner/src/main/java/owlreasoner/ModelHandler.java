@@ -18,7 +18,7 @@ public class ModelHandler {
     private ReasoningModule reasoningModule;
 
     private void addAxiomToKB(OWLAxiom axiom){
-        // Adds axiom to the knowledge base. Then checks for inconsistencies and calls the resolve methods if inconsistency is found. Very slow. :( :(
+        // Adds axiom to the knowledge base. Then checks for inconsistencies and calls the resolve methods if inconsistency is found.
 
         AddAxiom addAxiom=new AddAxiom(this.ontology,axiom);
         this.ontologyManager.applyChange(addAxiom);
@@ -50,6 +50,10 @@ public class ModelHandler {
     }
 
     public void updateOntology(String filename){
+        /* Update the orignal ontology with the axioms in the second ontology. 
+         * The axioms are added sequentially and consistency is checked after each addition.
+         * If found to be inconsistent, it is immediately resolved before adding the next axiom.
+         */
         System.out.println("Updating Ontology...");
         File file=new File(filename);
         try{

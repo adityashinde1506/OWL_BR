@@ -63,6 +63,7 @@ public class ReasoningModule {
     }
 
     public void populateRevisionModule(){
+        /* Populate revision module with unsatisfiable classes.*/
         this.revisionModule=new RevisionModule(this.reasoner);
         Node<OWLClass> unSatNode=this.reasoner.getUnsatisfiableClasses();
         for(OWLClass _class:unSatNode.getEntities()){
@@ -72,6 +73,10 @@ public class ReasoningModule {
     }
 
     public void reviseOntology(){
+        /* Gets the subclass axiom which is causing the inconsistency and deletes it.
+         * Actual implementation was supposed to weaken the subclass axiom.
+         * But could not figure out how to write weakened statement in OWL syntax.
+         */
         for(OWLAxiom axiom: this.revisionModule.getInconsistencyCreators()){
             RemoveAxiom raxiom=new RemoveAxiom(this.ontology,axiom);
             System.out.println("Removing axiom "+axiom.toString());
